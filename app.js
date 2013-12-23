@@ -94,12 +94,22 @@ $(document).bind('remotestreamadded.jingle', function (event, data, sid) {
     }
     var sess = connection.jingle.sessions[sid];
     var vid = document.createElement('video');
+    console.log(sess);
+    var span = document.createElement('span');
+    // FIXME: how to name this span? sess.peerjid is not right for jingle clients
+    //console.log('peer: ', Strophe.getResourceFromJid(sess.peerjid));
+    //span.id = 'remoteVideocontainer_' + Strophe.getResourceFromJid(sess.peerjid);
+    span.className = 'videocontainer';
     var id = 'remoteVideo_' + sid + '_' + data.stream.id;
     vid.id = id;
     vid.autoplay = true;
     vid.oncontextmenu = function () { return false; };
     var remotes = document.getElementById('remoteVideos');
-    remotes.appendChild(vid);
+    span.appendChild(vid);
+    if (id.indexOf('mixedmslabel') != -1) {
+        $(span).hide();
+    }
+    remotes.appendChild(span);
     var sel = $('#' + id);
     sel.hide();
     RTC.attachMediaStream(sel, data.stream);
@@ -107,12 +117,12 @@ $(document).bind('remotestreamadded.jingle', function (event, data, sid) {
     data.stream.onended = function () {
         console.log('stream ended', this.id);
         var src = $('#' + id).attr('src');
-        $('#' + id).remove();
+        $('#' + id).parent().remove();
         if (src === $('#largeVideo').attr('src')) {
             // this is currently displayed as large
             // pick the last visible video in the row
             // if nobody else is left, this picks the local video
-            var pick = $('#remoteVideos :visible:last').get(0);
+            var pick = $('#remoteVideos>span:visible:last>video').get(0);
             // mute if localvideo
             document.getElementById('largeVideo').volume = pick.volume;
             document.getElementById('largeVideo').src = pick.src;
@@ -232,8 +242,8 @@ function resizeLarge() {
         availableWidth = Math.floor(availableHeight * aspectRatio);
     }
     if (availableWidth < 0 || availableHeight < 0) return;
-    $('#largeVideo').width(availableWidth);
-    $('#largeVideo').height(availableWidth / aspectRatio);
+    $('#largeVideo').parent().width(availableWidth);
+    $('#largeVideo').parent().height(availableWidth / aspectRatio);
     resizeThumbnails();
 }
 
@@ -242,7 +252,7 @@ function resizeThumbnails() {
     // minus 4px for the delimiter lines on the top and bottom of the large video,
     // minus the 36px space inside the remoteVideos container used for highlighting shadow.
     var availableHeight = window.innerHeight - $('#largeVideo').height() - 79;
-    var numvids = $('#remoteVideos>video:visible').length;
+    var numvids = $('#remoteVideos>span:visible').length;
     // Remove the 1px borders arround videos.
     var availableWinWidth = $('#remoteVideos').width() - 2 * numvids;
     var availableWidth = availableWinWidth / numvids;
@@ -253,9 +263,9 @@ function resizeThumbnails() {
         availableWidth = Math.floor(availableHeight * aspectRatio);
     }
     // size videos so that while keeping AR and max height, we have a nice fit
-    $('#remoteVideos').height(availableHeight + 36); // add the 2*18px border used for highlighting shadow.
-    $('#remoteVideos>video:visible').width(availableWidth);
-    $('#remoteVideos>video:visible').height(availableHeight);
+    $('#remoteVideos').height(availableHeight+26); // add the 2*18px-padding-top border used for highlighting shadow.
+    $('#remoteVideos>span').width(availableWidth);
+    $('#remoteVideos>span').height(availableHeight);
 }
 
 $(document).ready(function () {
