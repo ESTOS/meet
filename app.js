@@ -303,7 +303,7 @@ $(document).ready(function () {
     }
 });
 
-$(window).bind('beforeunload', function () {
+$(window).bind('unload', function () {
     if (connection && connection.connected) {
         // ensure signout
         $.ajax({
