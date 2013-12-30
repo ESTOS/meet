@@ -183,11 +183,10 @@ $(document).bind('callterminated.jingle', function (event, sid, reason) {
 
 
 $(document).bind('joined.muc', function (event, jid, info) {
-    console.log('onJoinComplete', info);
     updateRoomUrl(window.location.href);
+    showToolbar();
     if (Object.keys(connection.emuc.members).length < 1) {
         focus = new ColibriFocus(connection, config.hosts.bridge);
-        return;
     }
 });
 
@@ -471,4 +470,8 @@ function openChat() {
 
 function updateRoomUrl(newRoomUrl) {
     roomUrl = newRoomUrl;
+}
+
+function showToolbar() {
+    $('#toolbar').css({visibility:"visible"});
 }
