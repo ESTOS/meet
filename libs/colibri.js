@@ -740,6 +740,8 @@ ColibriFocus.prototype.modifySources = function () {
     this.removessrc = [];
 
     sdp.raw = sdp.session + sdp.media.join('');
+    /*
+     * this seems to create a number of problems...
     this.peerconnection.setRemoteDescription(
         new RTCSessionDescription({type: 'offer', sdp: sdp.raw }),
         function () {
@@ -770,6 +772,33 @@ ColibriFocus.prototype.modifySources = function () {
         },
         function (error) {
             console.log('setModifiedRemoteDescription failed');
+        }
+    );
+    */
+    this.peerconnection.createOffer(
+        function (modifiedOffer) {
+            console.log('created (un)modified offer');
+            self.peerconnection.setLocalDescription(modifiedOffer,
+                function () {
+                    console.log('setModifiedLocalDescription ok');
+                    self.peerconnection.setRemoteDescription(
+                        new RTCSessionDescription({type: 'answer', sdp: sdp.raw }),
+                        function () {
+                            console.log('setModifiedRemoteDescription ok');
+                        },
+                        function (error) {
+                            console.log('setModifiedRemoteDescription failed');
+                        }
+                    );
+                    $(document).trigger('setLocalDescription.jingle', [self.sid]);
+                },
+                function (error) {
+                    console.log('setModifiedLocalDescription failed');
+                }
+            );
+        },
+        function (error) {
+            console.log('creating (un)modified offerfailed');
         }
     );
 };
