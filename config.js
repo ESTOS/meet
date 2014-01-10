@@ -4,6 +4,7 @@ var config = {
         muc: 'conference.your.domain.example', // FIXME: use XEP-0030
         bridge: 'jitsi-videobridge.your.domain.example' // FIXME: use XEP-0030
     },
+//  getroomnode: function (path) { return 'someprefixpossiblybasedonpath'; },
     useNicks: false,
     bosh: '/http-bind' // FIXME: use xep-0156 for that
 };
