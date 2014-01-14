@@ -79,7 +79,7 @@ function doJoin() {
             roomjid += '/' + Strophe.getNodeFromJid(connection.jid);
         }
     } else {
-        roomjid += '/' + Strophe.getNodeFromJid(connection.jid);
+        roomjid += '/' + Strophe.getNodeFromJid(connection.jid).substr(0,8);
     }
     connection.emuc.doJoin(roomjid);
 }
@@ -249,6 +249,9 @@ $(document).bind('setLocalDescription.jingle', function (event, sid) {
 $(document).bind('joined.muc', function (event, jid, info) {
     updateRoomUrl(window.location.href);
     showToolbar();
+    document.getElementById('localNick').appendChild(
+        document.createTextNode(Strophe.getResourceFromJid(jid) + ' (you)')
+    );
     if (Object.keys(connection.emuc.members).length < 1) {
         focus = new ColibriFocus(connection, config.hosts.bridge);
     }
@@ -257,13 +260,18 @@ $(document).bind('joined.muc', function (event, jid, info) {
 $(document).bind('entered.muc', function (event, jid, info, pres) {
     console.log('entered', jid, info);
     console.log(focus);
+
     var container = document.createElement('span');
     container.id = 'participant_' + Strophe.getResourceFromJid(jid);
     container.className = 'videocontainer';
     var remotes = document.getElementById('remoteVideos');
     remotes.appendChild(container);
+    var nickfield = document.createElement('span');
+    nickfield.appendChild(document.createTextNode(Strophe.getResourceFromJid(jid)));
+    container.appendChild(nickfield);
+    resizeThumbnails();
+
     if (focus !== null) {
-        // FIXME: this should prepare the video
         if (focus.confid === null) {
             console.log('make new conference with', jid);
             focus.makeConference(Object.keys(connection.emuc.members));
@@ -285,6 +293,7 @@ $(document).bind('left.muc', function (event, jid) {
     if (container) {
         // hide here, wait for video to close before removing
         $(container).hide(); 
+        resizeThumbnails();
     }
 
     if (Object.keys(connection.emuc.members).length === 0) {
